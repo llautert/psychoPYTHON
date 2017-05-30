@@ -19,6 +19,7 @@ def deep_1net(X, y):
     model.compile(loss=categorical_crossentropy,
                   optimizer=SGD(lr=0.01),
                   metrics=['accuracy', 'mae'])
+
     model.fit(X_train, Y_train, epochs=10, batch_size=30, verbose=1, validation_data=(X_test, Y_test))
     score = model.evaluate(X_test, Y_test, verbose=1)
     model.save("deep1net.h5")
@@ -26,133 +27,132 @@ def deep_1net(X, y):
     print('Test accuracy:', score[1])
     print('Test mae:', score[2])
 
-def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=False, is_number_categories_known=False, is_few_important_features=False, is_just_looking=False):
-    models = []
+def choose_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_categories_known, is_few_important_features, is_just_looking):
     names = []
+    models = []
 
-    X_train, X_test, Y_train, Y_test = cross_validation.train_test_split(X, y, test_size=0.33, random_state=42)
+    if X_train.shape[0] <= 50:
+        print("Error few data")
+        return
 
-    if X_train.shape[0] > 50:
-        if type_pred == 'category':
-            if is_labeled_data:
-                # classification
-                if X_train.shape[0] < 100000:
-                    names.append("SVM")
-                    models.append(svm.SVC())
-                    if is_text_data:
-                        names += ["GaussianNB",
-                                  "MultinomialNB",
-                                  "BernoulliNB"]
-                        models += [naive_bayes.GaussianNB(),
-                                  naive_bayes.MultinomialNB(),
-                                  naive_bayes.BernoulliNB()]
-                    else:
-                        names += ["KNeighborsClassifier",
-                                  "LinearSVMClassifier",
-                                  "AdaboostClassifier",
-                                  "BaggingClassifier",
-                                  "ExtraTreesClassifier",
-                                  "GradientBoostingClassifier",
-                                  "RandomForestClassifier"]
-                        models += [neighbors.KNeighborsClassifier(),
-                                  svm.LinearSVC(),
-                                  ensemble.AdaBoostClassifier(),
-                                  ensemble.BaggingClassifier(),
-                                  ensemble.ExtraTreesClassifier(),
-                                  ensemble.GradientBoostingClassifier(),
-                                  ensemble.RandomForestClassifier()]
+    if type_pred == 'category':
+        if is_labeled_data:
+            # classification
+            if X_train.shape[0] < 100000:
+                names.append("SVM")
+                models.append(svm.SVC())
+                if is_text_data:
+                    names += ["GaussianNB",
+                              "MultinomialNB",
+                              "BernoulliNB"]
+                    models += [naive_bayes.GaussianNB(),
+                               naive_bayes.MultinomialNB(),
+                               naive_bayes.BernoulliNB()]
                 else:
-                    names += ["SGDClassifier",
-                              "AdditiveChi2Sampler",
-                              "Nystroem",
-                              "RBFSampler",
-                              "SkewedChi2Sampler"]
-                    models += [linear_model.SGDClassifier(),
-                              kernel_approximation.AdditiveChi2Sampler(),
-                              kernel_approximation.Nystroem(),
-                              kernel_approximation.RBFSampler(),
-                              kernel_approximation.SkewedChi2Sampler()]
-            elif is_number_categories_known:
-                # clustering
-                if X_train.shape[0] < 10000:
-                    names += ["KMeans",
-                              "GMM"]
-                    models += [
-                        cluster.KMeans(),
-                        mixture.GMM()
-                    ]
-                else:
-                    names += ["KMeans",
-                              "MiniBatchKMeans"]
-                    models += [
-                        cluster.KMeans(),
-                        cluster.MiniBatchKMeans()
-                    ]
+                    names += ["KNeighborsClassifier",
+                              "LinearSVMClassifier",
+                              "AdaboostClassifier",
+                              "BaggingClassifier",
+                              "ExtraTreesClassifier",
+                              "GradientBoostingClassifier",
+                              "RandomForestClassifier"]
+                    models += [neighbors.KNeighborsClassifier(),
+                               svm.LinearSVC(),
+                               ensemble.AdaBoostClassifier(),
+                               ensemble.BaggingClassifier(),
+                               ensemble.ExtraTreesClassifier(),
+                               ensemble.GradientBoostingClassifier(),
+                               ensemble.RandomForestClassifier()]
             else:
-                if X_train.shape[0] < 10000:
-                    names += ["MeanShift",
-                              "VBGMM"]
-                    models += [
-                        cluster.MeanShift(),
-                        mixture.VBGMM()
-                    ]
-                else:
-                    print("tough luck")
-        elif type_pred == "quantity":
-            # regression
-            if X_train.shape[0] < 1000000000:
-                if is_few_important_features:
-                    names += ["Lasso",
-                              "ElasticNet"]
-                    models += [linear_model.Lasso(),
-                              linear_model.ElasticNet()]
-                else:
-                    names += ["Ridge",
-                              "LinearSVMRegressor",
-                              "RBFSVMRegressor",
-                              "AdaboostRegressor",
-                              "BaggingRegressor",
-                              "ExtraTreesRegressor",
-                              "GradientBoostingRegressor",
-                              "RandomForestRegressor"]
-                    models += [
-                        linear_model.Ridge(),
-                        svm.LinearSVR(),
-                        svm.SVR(kernel='rbf'),
-                        ensemble.AdaBoostRegressor(),
-                        ensemble.BaggingRegressor(),
-                        ensemble.ExtraTreesRegressor(),
-                        ensemble.GradientBoostingRegressor(),
-                        ensemble.RandomForestRegressor()
-                    ]
-            else:
-                names.append("SGDRegressor")
-                models.append(linear_model.SGDRegressor())
-        elif is_just_looking:
-            # dimensional reduction
-            names.append("RandomizedPCA")
-            models.append(decomposition.RandomizedPCA())
-            if X_train.shape[0] < 10000:
-                names += ["Isomap",
-                          "SpectalEmbedding",
-                          "LocallyLinearEmbedding"]
-                models += [
-                    manifold.Isomap(),
-                    manifold.SpectalEmbedding(),
-                    manifold.LocallyLinearEmbedding()
-                ]
-            else:
-                names += ["AdditiveChi2Sampler",
+                names += ["SGDClassifier",
+                          "AdditiveChi2Sampler",
                           "Nystroem",
                           "RBFSampler",
                           "SkewedChi2Sampler"]
-                models += [
-                    kernel_approximation.AdditiveChi2Sampler(),
-                    kernel_approximation.Nystroem(),
-                    kernel_approximation.RBFSampler(),
-                    kernel_approximation.SkewedChi2Sampler()]
+                models += [linear_model.SGDClassifier(),
+                           kernel_approximation.AdditiveChi2Sampler(),
+                           kernel_approximation.Nystroem(),
+                           kernel_approximation.RBFSampler(),
+                           kernel_approximation.SkewedChi2Sampler()]
+        elif is_number_categories_known:
+            # clustering
+            if X_train.shape[0] < 10000:
+                names += ["KMeans",
+                          "GMM"]
+                models += [cluster.KMeans(),
+                           mixture.GMM()]
+            else:
+                names += ["KMeans",
+                          "MiniBatchKMeans"]
+                models += [cluster.KMeans(),
+                           cluster.MiniBatchKMeans()]
         else:
-            print("tough luck")
+            if X_train.shape[0] < 10000:
+                names += ["MeanShift",
+                          "VBGMM"]
+                models += [cluster.MeanShift(),
+                           mixture.VBGMM()]
+            else:
+                print("tough luck")
+    elif type_pred == "quantity":
+        # regression
+        if X_train.shape[0] < 1000000000:
+            if is_few_important_features:
+                names += ["Lasso",
+                          "ElasticNet"]
+                models += [linear_model.Lasso(),
+                           linear_model.ElasticNet()]
+            else:
+                names += ["Ridge",
+                          "LinearSVMRegressor",
+                          "RBFSVMRegressor",
+                          "AdaboostRegressor",
+                          "BaggingRegressor",
+                          "ExtraTreesRegressor",
+                          "GradientBoostingRegressor",
+                          "RandomForestRegressor"]
+                models += [linear_model.Ridge(),
+                           svm.LinearSVR(),
+                           svm.SVR(kernel='rbf'),
+                           ensemble.AdaBoostRegressor(),
+                           ensemble.BaggingRegressor(),
+                           ensemble.ExtraTreesRegressor(),
+                           ensemble.GradientBoostingRegressor(),
+                           ensemble.RandomForestRegressor()]
+        else:
+            names.append("SGDRegressor")
+            models.append(linear_model.SGDRegressor())
+    elif is_just_looking:
+        # dimensional reduction
+        names.append("RandomizedPCA")
+        models.append(decomposition.RandomizedPCA())
+        if X_train.shape[0] < 10000:
+            names += ["Isomap",
+                      "SpectalEmbedding",
+                      "LocallyLinearEmbedding"]
+            models += [manifold.Isomap(),
+                       manifold.SpectalEmbedding(),
+                       manifold.LocallyLinearEmbedding()]
+        else:
+            names += ["AdditiveChi2Sampler",
+                      "Nystroem",
+                      "RBFSampler",
+                      "SkewedChi2Sampler"]
+            models += [kernel_approximation.AdditiveChi2Sampler(),
+                       kernel_approximation.Nystroem(),
+                       kernel_approximation.RBFSampler(),
+                       kernel_approximation.SkewedChi2Sampler()]
+    else:
+        print("tough luck")
+
+    return names, models
+
+def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=False, is_number_categories_known=False, is_few_important_features=False, is_just_looking=False):
+    X_train, X_test, Y_train, Y_test = cross_validation.train_test_split(X, y, test_size=0.33, random_state=42)
+    names_and_models = choose_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_categories_known, is_few_important_features, is_just_looking)
+
+    if names_and_models:
+        names, models = names_and_models
         # cross validation
         for name, m1 in zip(names, models):
             print(m1)
@@ -183,5 +183,3 @@ def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=F
                 print("Mean Absolute Error: %.2f" % (metrics.mean_absolute_error(Y_test, y_pred)))
                 print("Mean Squared Error: %.2f" % (metrics.mean_squared_error(Y_test, y_pred)))
                 print("Median Absolute Error: %.2f" % (metrics.median_absolute_error(Y_test, y_pred)))
-    else:
-        print("Error few data")
