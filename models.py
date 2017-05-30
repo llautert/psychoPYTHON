@@ -1,3 +1,4 @@
+from time import time
 from sklearn import *
 import matplotlib as mpl
 
@@ -78,18 +79,14 @@ def select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
             names += ["KMeans",
                       "MiniBatchKMeans",
                       "GMM"]
-            models += [
-                cluster.KMeans(),
-                mixture.GMM(),
-                cluster.MiniBatchKMeans()
-            ]
+            models += [cluster.KMeans(),
+                       mixture.GMM(),
+                       cluster.MiniBatchKMeans()]
         else:
             names += ["MeanShift",
                       "VBGMM"]
-            models += [
-                cluster.MeanShift(),
-                mixture.VBGMM()
-            ]
+            models += [cluster.MeanShift(),
+                       mixture.VBGMM()]
     elif type_pred == "quantity":
         # regression
         # names.append("SGDRegressor")
@@ -108,16 +105,14 @@ def select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
                       "ExtraTreesRegressor",
                       "GradientBoostingRegressor",
                       "RandomForestRegressor"]
-            models += [
-                linear_model.Ridge(),
-                svm.LinearSVR(max_iter=10),
-                svm.SVR(kernel='rbf', max_iter=10),
-                ensemble.AdaBoostRegressor(n_estimators=10),
-                ensemble.BaggingRegressor(n_jobs=-1),
-                ensemble.ExtraTreesRegressor(n_jobs=-1),
-                ensemble.GradientBoostingRegressor(n_estimators=10),
-                ensemble.RandomForestRegressor(n_jobs=-1)
-            ]
+            models += [linear_model.Ridge(),
+                       svm.LinearSVR(max_iter=10),
+                       svm.SVR(kernel='rbf', max_iter=10),
+                       ensemble.AdaBoostRegressor(n_estimators=10),
+                       ensemble.BaggingRegressor(n_jobs=-1),
+                       ensemble.ExtraTreesRegressor(n_jobs=-1),
+                       ensemble.GradientBoostingRegressor(n_estimators=10),
+                       ensemble.RandomForestRegressor(n_jobs=-1)]
     elif is_just_looking:
         # dimensional reduction
         names.append("RandomizedPCA")
@@ -129,14 +124,13 @@ def select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
                   "Nystroem",
                   "RBFSampler",
                   "SkewedChi2Sampler"]
-        models += [
-            manifold.Isomap(),
-            manifold.SpectalEmbedding(),
-            manifold.LocallyLinearEmbedding(),
-            kernel_approximation.AdditiveChi2Sampler(),
-            kernel_approximation.Nystroem(),
-            kernel_approximation.RBFSampler(),
-            kernel_approximation.SkewedChi2Sampler()]
+        models += [manifold.Isomap(),
+                   manifold.SpectalEmbedding(),
+                   manifold.LocallyLinearEmbedding(),
+                   kernel_approximation.AdditiveChi2Sampler(),
+                   kernel_approximation.Nystroem(),
+                   kernel_approximation.RBFSampler(),
+                   kernel_approximation.SkewedChi2Sampler()]
     else:
         print("tough luck")
 
@@ -181,24 +175,29 @@ def train_test_model(args):
 
 def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=False, is_number_categories_known=False,
                is_few_important_features=False, is_just_looking=False):
+    start_time = time()
     models = []
     names = []
     X_train, X_test, Y_train, Y_test = cross_validation.train_test_split(X, y, test_size=0.33, random_state=42)
 
-    if X_train.shape[0] > 50:
-        names, models = select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_categories_known,
-                                      is_few_important_features, is_just_looking)
-        pool = Pool(processes=4)
-        # paralelizando modelos
-        # register_parallel_backend('distributed', DistributedBackend)
-        sequence = []
-        # cross validation
-        externals.joblib.dump((X, y, X_train, Y_train, X_test, Y_test), "dataset.pkl", compress=9)
-        for name, m1 in zip(names, models):
-            sequence.append([name, m1, X, y, X_train, Y_train, X_test, Y_test, type_pred, is_number_categories_known,
-                             is_labeled_data])
-        pool.map(train_test_model, sequence)
-        pool.close()
-        pool.join()
-    else:
+    if X_train.shape[0] <= 50:
         print("Error few data")
+        return
+        
+    names, models = select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_categories_known,
+                                  is_few_important_features, is_just_looking)
+    pool = Pool(processes=4)
+    # paralelizando modelos
+    # register_parallel_backend('distributed', DistributedBackend)
+    sequence = []
+    # cross validation
+    externals.joblib.dump((X, y, X_train, Y_train, X_test, Y_test), "dataset.pkl", compress=9)
+    for name, m1 in zip(names, models):
+        sequence.append([name, m1, X, y, X_train, Y_train, X_test, Y_test, type_pred, is_number_categories_known,
+                         is_labeled_data])
+    pool.map(train_test_model, sequence)
+    pool.close()
+    pool.join()
+
+    end_time = time() - start_time
+    print("Total elapsed time: %.2f seconds" % end_time)

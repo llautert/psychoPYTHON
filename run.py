@@ -20,17 +20,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.train:
-        if args.typemodel is not None:
+        if args.typemodel:
             X, y = load_processed_data_test()
             if args.typemodel == 'autoscikit':
                 autoscikit(X, y, args.prediction, args.labeled_data, args.text_data, args.category_data, args.few_important_features, args.just_looking)
-        if args.typedeepmodel is not None:
+        if args.typedeepmodel:
             if args.typedeepmodel == '1net':
                 deep_1net(X, y)
 
     elif args.predict:
         X = load_predict_data_test()
-        if args.typemodel is not None:
+        if args.typemodel:
             print(predict(args.typemodel, X))
-        if args.typedeepmodel is not None:
+        if args.typedeepmodel:
             print(predict_deep(args.typedeepmodel, X))
