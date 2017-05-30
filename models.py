@@ -1,3 +1,4 @@
+from time import time
 from sklearn import *
 from utils import plot_learning_curve
 from keras.losses import *
@@ -148,6 +149,7 @@ def choose_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
     return names, models
 
 def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=False, is_number_categories_known=False, is_few_important_features=False, is_just_looking=False):
+    start_time = time()
     X_train, X_test, Y_train, Y_test = cross_validation.train_test_split(X, y, test_size=0.33, random_state=42)
     names_and_models = choose_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_categories_known, is_few_important_features, is_just_looking)
 
@@ -155,7 +157,10 @@ def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=F
         names, models = names_and_models
         # cross validation
         for name, m1 in zip(names, models):
+            model_time = time()
+            print('\n-----------------------------------------------------------------------------')
             print(m1)
+            print('-----------------------------------------------------------------------------')
             if not is_number_categories_known:
                 plot_learning_curve(m1, X, y, name, ylim=(0.7, 1.01))
             m1.fit(X_train, Y_train)
@@ -183,3 +188,10 @@ def autoscikit(X, y, type_pred='category', is_labeled_data=False, is_text_data=F
                 print("Mean Absolute Error: %.2f" % (metrics.mean_absolute_error(Y_test, y_pred)))
                 print("Mean Squared Error: %.2f" % (metrics.mean_squared_error(Y_test, y_pred)))
                 print("Median Absolute Error: %.2f" % (metrics.median_absolute_error(Y_test, y_pred)))
+
+            elapsed_time = time() - model_time
+            print("Elapsed time: %.2f seconds" % elapsed_time)
+
+        print('\n-----------------------------------------------------------------------------')
+        end_time = time() - start_time
+        print("Total elapsed time: %.2f seconds" % end_time)
