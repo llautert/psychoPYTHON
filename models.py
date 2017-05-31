@@ -61,7 +61,8 @@ def select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
                           "AdditiveChi2Sampler",
                           "Nystroem",
                           "RBFSampler",
-                          "SkewedChi2Sampler"]
+                          "SkewedChi2Sampler",
+                          "LogisticRegression"]
                 models += [neighbors.KNeighborsClassifier(),
                            svm.LinearSVC(max_iter=10),
                            ensemble.AdaBoostClassifier(),
@@ -73,7 +74,8 @@ def select_models(X_train, type_pred, is_labeled_data, is_text_data, is_number_c
                            kernel_approximation.AdditiveChi2Sampler(),
                            kernel_approximation.Nystroem(),
                            kernel_approximation.RBFSampler(),
-                           kernel_approximation.SkewedChi2Sampler()]
+                           kernel_approximation.SkewedChi2Sampler(),
+                           linear_model.LogisticRegression()]
         elif is_number_categories_known:
             # clustering
             names += ["KMeans",
