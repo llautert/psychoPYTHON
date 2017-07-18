@@ -1,5 +1,5 @@
 # psychoPYTHON
-automatizando escolha de modelos
+> psychoPython é um projeto **Open Sourse** e tem como objetivo automatizar a escolha de modelos estatísticos e de redes neurais afim de auxiliar a propagação da cultura de ciência de dados para qualquer área, de forma rápida e simplificada. 
 
 ## run.py
 Contem o codigo necessario para receber argumentos e rodar o treinamento ou predicao de modelos do scikit learn ou de deep learning.
@@ -13,7 +13,7 @@ Metodos para predicao do scikit learn ou deep learning.
 ## utils.py
 Metodos utilitarios, atualmente existe um metodo para plotar a curva de aprendizagem.
 
-## process_data.py
+## data_management.py
 Metodos para leitura de dados para treinamento, teste e predição e se necessário deve ser especificado os métodos
 para processamento, limpeza e estruturação dos dados.
 
