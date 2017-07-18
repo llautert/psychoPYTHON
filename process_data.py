@@ -10,8 +10,8 @@ from sklearn.preprocessing import LabelEncoder
 
 def load_processed_data_test():
     df = pd.read_csv("data", sep=';')
-    X = df2[['variaveis explicativas']]
-    Y = pd.to_numeric(df2['resposta'])
+    X = df[['variaveis explicativas']]
+    y = pd.to_numeric(df['resposta'])
 
 
 # tratando variáveis categóricas
@@ -31,5 +31,5 @@ def load_processed_data_test():
         categorical_indexes.append(X.columns.get_loc(cat))
     one_hot_encoder = OneHotEncoder(categorical_features = categorical_indexes)
     print(X.head())
-    print(Y.head())
-    return X, Y
+    print(y.head())
+    return X, y
