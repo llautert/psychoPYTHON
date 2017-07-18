@@ -1,6 +1,6 @@
 import argparse
 from models import *
-from process_data import *
+from data_management import *
 from predict import *
 
 if __name__ == '__main__':
