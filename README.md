@@ -1,5 +1,5 @@
 # psychoPYTHON
-> psychoPython é um projeto **Open Sourse** e tem como objetivo automatizar a escolha de modelos estatísticos e de redes neurais afim de auxiliar a propagação da cultura de ciência de dados para qualquer área, de forma rápida e simplificada. 
+> psychoPython é um projeto **Open Source** e tem como objetivo automatizar a escolha de modelos estatísticos e de redes neurais afim de auxiliar a propagação da cultura de ciência de dados para qualquer área, de forma rápida e simplificada. 
 
 ## run.py
 Contem o codigo necessario para receber argumentos e rodar o treinamento ou predicao de modelos do scikit learn ou de deep learning.
